@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Kratos-Feldzug</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
+<style>
+:root{--bg:#27353d;--panel:#e9ece6;--ink:#1b2328;--mut:#5d6a70;--line:#c2c9c2;--ok:#2e7d32;--bad:#b3362c;--acc:#e8913a;--dot:#111;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141b1f;--panel:#222d33;--ink:#e6ebe8;--mut:#9aa7ac;--line:#37454c;--ok:#5fb865;--bad:#e5675b;--dot:#e6ebe8}}
+:root[data-theme="dark"]{--bg:#141b1f;--panel:#222d33;--ink:#e6ebe8;--mut:#9aa7ac;--line:#37454c;--ok:#5fb865;--bad:#e5675b;--dot:#e6ebe8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font:17px/1.4 Barlow,system-ui,-apple-system,sans-serif;touch-action:manipulation;-webkit-user-select:none;user-select:none;background-image:radial-gradient(#ffffff14 1.5px,transparent 1.5px);background-size:22px 22px}
+h1,h2,.num{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;margin:0}
+.scr{display:none}.scr.on{display:block;animation:in .35s}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+@keyframes pop{from{opacity:0;transform:scale(.88)}}
+@keyframes pu{50%{transform:scale(1.5)}}
+@keyframes fl{to{transform:translateY(-10px)}}
+@keyframes bump{40%{transform:scale(1.4)}}
+.noanim *{animation:none!important;transition:none!important}
+.mm{max-width:460px;margin:0 auto;padding:28px 20px;text-align:center;color:#e9ece6}
+.mm h1{font-size:68px;letter-spacing:3px;line-height:1}
+.mm .sub{color:#aab6bb}
+.pl{width:150px;animation:fl 4s ease-in-out infinite alternate}
+.mb{display:block;width:100%;margin:12px 0;min-height:64px;font:700 27px "Barlow Condensed",sans-serif;color:#e9ece6;border-color:#e9ece6}
+.mb:active{color:#111}
+header{display:flex;align-items:center;gap:14px;padding:12px 20px;color:#e9ece6;flex-wrap:wrap}
+header h1{font-size:30px}
+header .st{margin-left:auto;display:flex;gap:18px;font-size:17px}
+header .st b{font-family:"Barlow Condensed",sans-serif;font-size:21px}
+header button{color:#e9ece6;border-color:#e9ece6}
+main{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 20px 24px;max-width:1200px;margin:auto}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+.p{background:var(--panel);border-radius:10px;padding:16px;margin-bottom:16px;border-left:6px solid var(--acc)}
+.p h2{font-size:27px}
+.sub{color:var(--mut);margin:2px 0 10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.chip{border:2px solid var(--line);border-radius:20px;padding:4px 12px;font-size:16px}
+.chip.ok{border-color:var(--ok);color:var(--ok)}.chip.no{border-color:var(--bad);color:var(--bad)}
+.bar{height:12px;background:var(--line);border-radius:6px;overflow:hidden;margin:4px 0 10px}
+.bar>div{height:100%;background:var(--ok);transition:width .3s}
+.pre{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+button{font:600 17px Barlow,system-ui,sans-serif;min-height:48px;min-width:48px;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:8px;padding:6px 12px;transition:transform .1s,background .15s}
+button:active{background:var(--acc);color:#111;transform:scale(.95)}
+button:disabled{opacity:.35}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.go{width:100%;min-height:62px;font:700 26px "Barlow Condensed",sans-serif;background:var(--ink);color:var(--panel)}
+.row{display:grid;grid-template-columns:34px 1fr auto;gap:8px 10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.ic{width:32px;height:32px}
+.row small,.sl small{display:block;color:var(--mut);font-size:14px}
+.ctl{display:flex;align-items:center;gap:6px}
+.ctl .num{min-width:36px;text-align:center;font-size:26px}
+.num.b{animation:bump .25s}
+canvas{width:100%;height:170px;display:block;background:#8883;border-radius:8px}
+#map{width:100%;display:block;background:#2c4a5a;border-radius:8px}
+.ld{fill:#6d7f5c;stroke:#d9d2b0;stroke-width:3}
+.rt{fill:none;stroke:#fff9;stroke-width:3;stroke-dasharray:8 7}
+.nd circle{fill:#8a949a;stroke:#fff;stroke-width:2;transform-box:fill-box;transform-origin:center}
+.nd.done circle{fill:#2e9a3a}.nd.cur circle{fill:var(--acc);animation:pu 1.3s infinite}
+.nd text{fill:#fff;font:700 13px Barlow,sans-serif;text-anchor:middle;paint-order:stroke;stroke:#0008;stroke-width:3px}
+.nd .lb{font-size:11px;font-weight:600}
+#cvy{transition:transform 1.4s ease-in-out}
+#cvy .ring{fill:#e8913a55;transform-box:fill-box;transform-origin:center;animation:pu 1.3s infinite}
+.df{display:block;width:100%;text-align:left;margin:8px 0;min-height:60px}
+.df.sel{background:var(--ink);color:var(--panel)}
+.df small{display:block;font-weight:400;opacity:.8}
+.sl{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#ov{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px;z-index:9}
+#ov.on{display:flex}
+#ov .p{max-width:520px;width:100%;margin:0;animation:pop .3s}
+.ls{margin:10px 0;display:grid;gap:4px}
+.w{color:var(--ok)}.l{color:var(--bad)}
+.sw{max-width:560px;margin:0 auto;padding:20px}
+.sw h2{color:#e9ece6;font-size:36px;margin-bottom:12px}
+</style></head><body>
+<div id="menu" class="scr on"><div class="mm">
+<svg class="pl" viewBox="0 0 120 120"><defs><radialGradient id="g" cx=".35" cy=".3"><stop offset="0" stop-color="#f2b46d"/><stop offset="1" stop-color="#6a3a1c"/></radialGradient></defs><circle cx="60" cy="60" r="38" fill="url(#g)"/><ellipse cx="60" cy="62" rx="56" ry="12" fill="none" stroke="#e9ece699" stroke-width="3" transform="rotate(-18 60 60)"/></svg>
+<h1>KRATOS</h1><p class="sub">Feldzug der terenischen Armee</p>
+<button class="mb" data-a="newg">Neuer Feldzug</button><button class="mb" data-a="loadscr">Feldzug laden</button><button class="mb" data-a="optscr">Optionen</button></div></div>
+<div id="sub" class="scr"></div>
+<div id="game" class="scr">
+<header><h1>Kratos-Feldzug</h1><button data-a="menu">Speichern &amp; Menü</button><div class="st" id="st"></div></header>
+<main>
+<section>
+ <div class="p" id="mi"></div>
+ <div class="p"><div id="mapw"></div><div class="sub" id="mpt" style="margin:8px 0 0"></div></div>
+ <div class="p"><canvas id="cv"></canvas><div class="sub" id="cvt" style="margin:8px 0 0"></div></div>
+ <button class="go" id="go" data-a="go">Einsatz befehlen</button>
+</section>
+<section class="p" id="un"></section>
+</main></div>
+<div id="ov"><div class="p" id="ovc"></div></div>
+<script>
+const U={inf:{n:'Infanterie',c:1,p:1,col:'#111'},eng:{n:'Pioniere',c:2,p:1,col:'#1a2ee0'},sct:{n:'Späher',c:2,p:1,col:'#2e7d32'},med:{n:'Sanitäter',c:2,p:.5,col:'#d9534f'},art:{n:'Mobile Artillerie',c:4,p:6,col:'#e8913a',v:1},arm:{n:'Panzerwagen',c:4,p:6,col:'#7a4a1a',v:1},tank:{n:'Panzer',c:6,p:11,col:'#8c2a22',v:1},barge:{n:'Landungsboote',c:3,p:0,col:'#666',v:1}};
+const K=Object.keys(U);
+const B='<circle cx="16" cy="9" r="5"/><path d="M7 28c0-8 4-12 9-12s9 4 9 12z"/>';
+const IC={inf:B,eng:B+'<path d="M11 20h10v3H11zM11 25h10v2H11z" fill="#fff"/>',sct:B+'<path d="M16 18l4 7h-8z" fill="#fff"/>',med:B+'<path d="M14.5 19h3v3h3v3h-3v3h-3v-3h-3v-3h3z" fill="#fff"/>',
+art:'<rect x="3" y="12" width="22" height="5" rx="2" transform="rotate(-18 14 14)"/><rect x="9" y="18" width="15" height="6" rx="1"/><circle cx="12" cy="27" r="3.5"/><circle cx="22" cy="27" r="3.5"/>',
+arm:'<path d="M3 22l3-8h14l5 4h4v7H3z"/><circle cx="9" cy="26" r="3.5" fill="#222"/><circle cx="23" cy="26" r="3.5" fill="#222"/>',
+tank:'<rect x="3" y="21" width="26" height="7" rx="3.5"/><rect x="8" y="14" width="14" height="7" rx="2"/><rect x="20" y="16" width="11" height="2.5"/>',
+barge:'<path d="M2 18h28l-5 10H7z"/><rect x="12" y="10" width="8" height="8"/>'};
+const ic=k=>`<svg class="ic" viewBox="0 0 32 32" style="fill:${k=='inf'?'var(--dot)':U[k].col}">${IC[k]}</svg>`;
+const RANKS=['Sergeant','Leutnant','Landungskapitän','Schiffskapitän','Flottenkapitän'];
+const D={simpel:{m:.7,l:5,r:18,t:'Schwächere Kratosier, 5 Leben, viel Nachschub'},medial:{m:1,l:3,r:14,t:'Ausgewogen: 3 Leben'},schwer:{m:1.2,l:2,r:11,t:'Starke Kratosier, 2 Leben'},suicidal:{m:1.5,l:1,r:8,t:'Kratosier ×1,5, nur 1 Leben, kaum Nachschub'}};
+const PRE={strike:{n:'Stoßgruppe',v:{inf:8,eng:1,sct:2,med:1,arm:2}},land:{n:'Landungstruppe',v:{inf:40,eng:6,sct:8,med:8,barge:8}},field:{n:'Feldbataillon',v:{inf:60,eng:12,sct:6,med:8,tank:4,art:2}},reg:{n:'Mobiles Provinzregiment',v:{inf:140,eng:24,sct:8,med:14,tank:10,arm:10,barge:4,art:10}}};
+const REQ={coast:{n:'Küstenlandung',k:'barge',b:4},mine:{n:'Minenfelder',k:'eng',b:4},fog:{n:'Nebel',k:'sct',b:3},fort:{n:'Festung',k:'art',b:2},front:{n:'Panzerfront',k:'tank',b:2}};
+const MS=[['Hafen Valmar',['coast'],'Küstenclans'],['Nebelmoor',['fog'],'Nebelwandler'],['Minengürtel',['mine'],'Minenleger'],['Festung Karst',['fort','mine'],'Karst-Wächter'],['Salzküste',['coast','fog'],'Salzfischer'],['Panzerpass',['front','fog'],'Felsreiter'],['Stahlwall',['fort','front'],'Wall-Garde'],['Sturm auf Orvath',['coast','mine','front'],'Rat von Orvath']];
+const NODES=[[50,290],[120,250],[190,205],[260,245],[330,170],[400,268],[460,170],[520,110],[560,65]];
+const $=s=>document.querySelector(s),z=()=>Object.fromEntries(K.map(k=>[k,0]));
+const ST={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(_){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}}};
+let SV=ST.get('kr-sv',[null,null,null]),OP=ST.get('kr-op',{anim:!matchMedia('(prefers-reduced-motion:reduce)').matches,theme:'auto'}),G,sel='medial',arm=-1;
+function applyOp(){document.body.classList.toggle('noanim',!OP.anim);const t=OP.theme;t=='auto'?delete document.documentElement.dataset.theme:document.documentElement.dataset.theme=t=='hell'?'light':'dark'}
+function show(id){document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id))}
+function slots(mode){return [0,1,2].map(s=>{const v=SV[s];const info=v?`Einsatz ${Math.min(v.i+1,8)}/8 · ${v.diff} · ${v.score} Punkte${v.over?' · beendet':''}<small>${v.ts}</small>`:'leer';
+const b=mode=='new'?`<button data-a="start" data-s="${s}">${v?'Überschreiben':'Hier starten'}</button>`:(v&&!v.over?`<button data-a="load" data-s="${s}">Laden</button>`:'')+(v?`<button data-a="del" data-s="${s}">${arm==s?'Sicher?':'Löschen'}</button>`:'');
+return `<div class="p sl"><div><b>Feldzug ${s+1}</b><br>${info}</div><div class="ctl">${b}</div></div>`}).join('')}
+function sub(kind){let h='';const back='<button class="mb" data-a="back" style="min-height:52px">Zurück</button>';
+if(kind=='newg')h=`<h2>Neuer Feldzug</h2><div class="p"><b>Schwierigkeit</b>${Object.keys(D).map(k=>`<button class="df ${k==sel?'sel':''}" data-a="df" data-k="${k}">${k[0].toUpperCase()+k.slice(1)}<small>${D[k].t}</small></button>`).join('')}</div><h2 style="font-size:26px">Speicherplatz wählen</h2>${slots('new')}`;
+if(kind=='load')h=`<h2>Feldzug laden</h2>${slots('load')}`;
+if(kind=='opt')h=`<h2>Optionen</h2><div class="p sl"><div><b>Animationen</b><small>Karte, Gefecht, Übergänge</small></div><button data-a="oa">${OP.anim?'An':'Aus'}</button></div><div class="p sl"><div><b>Erscheinungsbild</b><small>Hell, dunkel oder automatisch</small></div><button data-a="ot">${OP.theme}</button></div><div class="p sl"><div><b>Alle Speicherstände</b><small>Unwiderruflich löschen</small></div><button data-a="wipe">${arm==9?'Sicher?':'Löschen'}</button></div>`;
+$('#sub').innerHTML=`<div class="sw">${h}${back}</div>`;show('sub')}
+const sv=()=>{SV[G.slot]={...G,dep:z(),lost:z(),busy:0,ts:new Date().toLocaleString('de')};ST.set('kr-sv',SV)};
+function start(g){G=g;G.dep=z();G.lost=z();G.busy=0;let m='<svg id="map" viewBox="0 0 600 330"><path class="ld" d="M20 300C20 200 80 120 180 90C260 60 360 40 470 40C550 40 585 80 580 130C575 200 560 250 500 290C430 318 330 318 250 305C160 315 60 328 20 300Z"/><path d="M440 150l18-35 18 35zM480 120l16-30 16 30z" fill="#4d4a40"/><circle cx="195" cy="200" r="32" fill="#fff4"/><circle cx="400" cy="250" r="30" fill="#fff4"/><g fill="#8c2a22"><circle cx="262" cy="222" r="2.5"/><circle cx="278" cy="228" r="2.5"/><circle cx="270" cy="236" r="2.5"/><circle cx="318" cy="150" r="2.5"/><circle cx="342" cy="154" r="2.5"/></g><polyline class="rt" points="'+NODES.map(n=>n.join(',')).join(' ')+'"/>';
+NODES.forEach((n,i)=>m+=`<g class="nd" data-n="${i}" transform="translate(${n})"><circle r="11"/><text y="4">${i||'▲'}</text><text class="lb" y="26">${i?MS[i-1][0]:'Landeplatz'}</text></g>`);
+m+='<g id="cvy"><circle class="ring" r="16"/><rect x="-13" y="-7" width="26" height="14" rx="3" fill="#e8913a" stroke="#111" stroke-width="2"/><circle cx="-6" r="2.4"/><circle r="2.4"/><circle cx="6" r="2.4"/><text y="-20" style="fill:#fff;font:700 12px Barlow,sans-serif;text-anchor:middle;paint-order:stroke;stroke:#000b;stroke-width:3px">Konvoi</text></g></svg>';
+$('#mapw').innerHTML=m;show('game');place(G.i,0);render()}
+function place(n,a){const c=$('#cvy');c.style.transition=a?'':'none';c.style.transform=`translate(${NODES[n][0]}px,${NODES[n][1]}px)`;if(!a){void c.getBoundingClientRect();c.style.transition=''}}
+const rk=()=>Math.min(4,Math.floor(G.wins*.6)),cap=()=>50+25*rk(),cost=d=>K.reduce((a,k)=>a+d[k]*U[k].c,0);
+const th=t=>REQ[t].b+Math.floor(G.i/3),E=()=>(45+18*G.i)*D[G.diff].m,sp=()=>Math.max(.04,.3-.04*G.dep.sct),dc=()=>getComputedStyle(document.body).getPropertyValue('--dot').trim()||'#111';
+function pw(){let p=K.reduce((a,k)=>a+G.dep[k]*U[k].p,0);MS[Math.min(G.i,7)][1].forEach(t=>p*=G.dep[REQ[t].k]>=th(t)?1.1:.65);return p}
+function fill(v){let lo=0,hi=12,mk=t=>{const d=z();K.forEach(k=>d[k]=Math.min(G.pool[k],Math.round((v[k]||0)*t)));return d};
+for(let n=0;n<24;n++){const m=(lo+hi)/2;cost(mk(m))<=cap()?lo=m:hi=m}G.dep=mk(lo);G.lost=z();render()}
+function render(){const i=Math.min(G.i,7),m=MS[i],d=G.dep,c=cost(d),p=pw(),e=E(),s=sp();
+$('#st').innerHTML=`<span>Rang <b>${RANKS[rk()]}</b></span><span>Leben <b>${'♥'.repeat(G.lives)||'–'}</b></span><span>Punkte <b>${G.score}</b></span><span><b>${G.diff}</b></span>`;
+$('#mi').innerHTML=`<h2>Einsatz ${i+1}/8: ${m[0]}</h2><div class="sub">Gegner: ${m[2]} von Kratos · Stärke ca. ${Math.round(e*(1-s))}–${Math.round(e*(1+s))} (mehr Späher = genauer)</div>
+<div class="chips">${m[1].map(t=>{const ok=d[REQ[t].k]>=th(t);return `<span class="chip ${ok?'ok':'no'}">${ok?'✓':'✗'} ${REQ[t].n}: ${th(t)}× ${U[REQ[t].k].n}</span>`}).join('')}</div>
+<div>Eigene Stärke <b>${Math.round(p)}</b></div><div class="bar"><div style="width:${Math.min(100,p/(e*1.3)*100)}%"></div></div>
+<div>Befehlskapazität <b>${c}/${cap()}</b></div><div class="bar"><div style="width:${c/cap()*100}%;background:var(--acc)"></div></div>`;
+document.querySelectorAll('.nd').forEach(n=>{const k=+n.dataset.n;n.setAttribute('class','nd'+(k<=G.i&&k>0?' done':'')+(k==G.i+1&&!G.over?' cur':''))});
+$('#mpt').textContent=G.over?'Feldzug beendet.':`Konvoi bei ${G.i?MS[G.i-1][0]:'Landeplatz'} – nächstes Ziel: ${m[0]} (${m[2]}).`;
+$('#un').innerHTML=`<h2>Truppen aufstellen</h2><div class="pre">${Object.entries(PRE).map(([k,v])=>`<button data-a="pre" data-k="${k}">${v.n}</button>`).join('')}</div>
+<button data-a="clr" style="width:100%">Alle zurück in die Reserve</button>`+K.map(k=>`<div class="row">${ic(k)}<div>${U[k].n}<small>Kosten ${U[k].c} · Reserve ${G.pool[k]-d[k]}</small></div>
+<div class="ctl">${k=='inf'?'<button data-a="st" data-k="inf" data-d="-10">−10</button>':''}<button data-a="st" data-k="${k}" data-d="-1">−</button><span class="num${G.bk==k?' b':''}">${d[k]}</span><button data-a="st" data-k="${k}" data-d="1">+</button>${k=='inf'?'<button data-a="st" data-k="inf" data-d="10">+10</button>':''}</div></div>`).join('');
+G.bk=0;$('#go').disabled=!c||G.over;draw()}
+function sz(){const cv=$('#cv'),r=devicePixelRatio||1,W=cv.clientWidth;cv.width=W*r;cv.height=170*r;const x=cv.getContext('2d');x.scale(r,r);return[x,W]}
+function draw(){const[x,W]=sz(),dep=G.dep;let n=0,vx=0;const per=Math.max(1,Math.floor((W-60)/12));
+K.forEach(k=>{for(let j=0;j<dep[k];j++){const lost=j>=dep[k]-G.lost[k],u=U[k];
+if(!u.v){const px=10+(n%per)*12,py=10+Math.floor(n/per)*12;n++;if(py>164)continue;x.beginPath();x.arc(px,py,4,0,7);if(lost){x.strokeStyle='#b3362c';x.lineWidth=1.5;x.stroke()}else{x.fillStyle=k=='inf'?dc():u.col;x.fill()}}
+else{const px=W-14-Math.floor(vx/8)*13,py=12+(vx%8)*19;vx++;x.fillStyle=lost?'#b3362c55':u.col;x.fillRect(px,py,7,16)}}});
+$('#cvt').textContent=cost(dep)?'Punkte: Fußtruppen, Balken: Fahrzeuge. Rot umrandet = Verluste.':'Noch keine Truppen aufgestellt.'}
+function battle(win,e,lost,cb){const[x,W]=sz(),cols=Math.max(6,Math.floor((W/2-24)/13)),own=[];
+K.forEach(k=>{for(let j=0;j<G.dep[k];j++)own.push([k,j>=G.dep[k]-lost[k],Math.random()*.5+.35])});
+const en=Array.from({length:Math.min(160,Math.round(e/2))},()=>Math.random()*.5+.35),t0=performance.now();
+(function f(now){const t=Math.min(1,(now-t0)/1800),sh=Math.sin(t*Math.PI)*34;x.clearRect(0,0,W,170);
+if(t>.15&&t<.9){x.strokeStyle='#e8913a';x.lineWidth=1.5;for(let q=0;q<5;q++){const y=10+Math.random()*150;x.beginPath();x.moveTo(W/2-30+Math.random()*20,y);x.lineTo(W/2+10+Math.random()*20,y+Math.random()*10-5);x.stroke()}}
+own.forEach((o,n)=>{if(o[1]&&t>o[2])return;const px=10+(n%cols)*13+sh,py=10+Math.floor(n/cols)*13,u=U[o[0]];x.fillStyle=o[0]=='inf'?dc():u.col;if(u.v)x.fillRect(px-4,py-5,8,10);else{x.beginPath();x.arc(px,py,4,0,7);x.fill()}});
+x.fillStyle='#8a4bd6';en.forEach((q,n)=>{if(t>q&&(win||n%3==0))return;const px=W-10-(n%cols)*13-sh,py=10+Math.floor(n/cols)*13;x.beginPath();x.arc(px,py,4,0,7);x.fill()});
+t<1?requestAnimationFrame(f):cb()})(t0)}
+function go(){if(G.busy||G.over)return;const d=G.dep,m=MS[G.i],p=pw(),e=E()*(1+(Math.random()*2-1)*sp()),ra=p/e,win=ra>=1;
+const f=win?Math.min(.3,Math.max(.05,.28/ra)):Math.min(.7,.4+(1-ra)*.4),md=Math.min(.5,d.med/Math.max(1,d.inf)*4),lost=z();
+K.forEach(k=>{lost[k]=Math.min(d[k],Math.round(d[k]*f*(1-md)*(k=='med'?.5:1)));G.pool[k]-=lost[k]});G.lost=lost;
+let pts=0;if(win){G.wins++;pts=Math.round(ra*100);G.score+=pts}else G.lives--;
+const old=rk()-(win&&Math.min(4,Math.floor((G.wins-1)*.6))<rk()?1:0);G.i++;const over=G.lives<=0||G.i>=8;G.over=over;let re='';
+if(!over){const R=D[G.diff].r;G.pool.inf+=R;G.pool.eng+=2;G.pool.sct++;G.pool.med++;const vs=['art','arm','tank','barge'].sort(()=>Math.random()-.5).slice(0,2);vs.forEach(k=>G.pool[k]++);re=`Nachschub: +${R} Infanterie, +2 Pioniere, +1 Späher, +1 Sanitäter, +1 ${U[vs[0]].n}, +1 ${U[vs[1]].n}`}
+const ls=K.filter(k=>lost[k]).map(k=>`<span>${ic(k).replace('class="ic"','class="ic" style="width:20px;height:20px;vertical-align:middle"')} −${lost[k]} ${U[k].n}</span>`).join('')||'<span>Keine Verluste</span>';
+let best=0;if(over){const bs=ST.get('kr-best',{});best=bs[G.diff]||0;if(G.score>best){best=G.score;bs[G.diff]=best;ST.set('kr-best',bs)}}
+const h=`<h2 class="${win?'w':'l'}">${win?'Sieg':'Rückschlag'} bei ${m[0]}</h2><div class="sub">${m[2]}: Stärke ${Math.round(e)} gegen deine ${Math.round(p)}${win?` · +${pts} Punkte`:' · 1 Leben verloren'}</div><div class="ls">${ls}</div>`+
+(win&&rk()>old?`<p><b>Beförderung zum ${RANKS[rk()]}!</b> Befehlskapazität jetzt ${cap()}.</p>`:'')+
+(over?`<p><b>${G.lives>0?'Brückenkopf auf Kratos gesichert – Feldzug gewonnen!':'Der Feldzug ist verloren.'}</b><br>Punkte ${G.score} · Bestwert (${G.diff}) ${best}</p><button class="go" data-a="menu">Zum Hauptmenü</button>`:`<p>${re}</p><button class="go" data-a="next">Nächster Einsatz</button>`);
+const done=()=>{G.busy=0;sv();render();$('#ovc').innerHTML=h;$('#ov').classList.add('on')};G.busy=1;
+if(!OP.anim){place(G.i,0);return done()}place(G.i,1);setTimeout(()=>battle(win,e,lost,done),1500)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,k=b.dataset.k,s=+b.dataset.s;if(G&&G.busy)return;
+if(a=='st'){const o=G.dep[k];let n=Math.max(0,Math.min(G.pool[k],o+ +b.dataset.d));G.dep[k]=n;while(G.dep[k]>o&&cost(G.dep)>cap())G.dep[k]--;G.lost=z();G.bk=k;render()}
+else if(a=='pre')fill(PRE[k].v);else if(a=='clr'){G.dep=z();G.lost=z();render()}
+else if(a=='go'&&cost(G.dep))go();
+else if(a=='next'){$('#ov').classList.remove('on');G.dep=z();G.lost=z();render()}
+else if(a=='menu'){$('#ov').classList.remove('on');if(G&&!G.busy)sv();arm=-1;show('menu')}
+else if(a=='newg'){arm=-1;sub('newg')}else if(a=='loadscr'){arm=-1;sub('load')}else if(a=='optscr'){arm=-1;sub('opt')}
+else if(a=='back'){arm=-1;show('menu')}
+else if(a=='df'){sel=k;sub('newg')}
+else if(a=='start'){const dd=D[sel];start({slot:s,diff:sel,i:0,wins:0,lives:dd.l,score:0,over:false,pool:{inf:60,eng:6,sct:5,med:5,art:2,arm:4,tank:2,barge:4}});sv()}
+else if(a=='load'){start(JSON.parse(JSON.stringify(SV[s])))}
+else if(a=='del'){if(arm==s){SV[s]=null;ST.set('kr-sv',SV);arm=-1}else arm=s;sub('load')}
+else if(a=='oa'){OP.anim=!OP.anim;ST.set('kr-op',OP);applyOp();sub('opt')}
+else if(a=='ot'){OP.theme={auto:'hell',hell:'dunkel',dunkel:'auto'}[OP.theme];ST.set('kr-op',OP);applyOp();sub('opt')}
+else if(a=='wipe'){if(arm==9){SV=[null,null,null];ST.set('kr-sv',SV);arm=-1}else arm=9;sub('opt')}});
+addEventListener('resize',()=>{if(G&&!G.busy&&$('#game').classList.contains('on'))draw()});applyOp();
+</script></body></html>
