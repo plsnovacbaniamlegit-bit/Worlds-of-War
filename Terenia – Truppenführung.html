@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Terenia – Truppenführung</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
+<style>
+:root{--bg:#27353d;--panel:#e9ece6;--ink:#1b2328;--mut:#5d6a70;--line:#c2c9c2;--ok:#2e7d32;--bad:#b3362c;--acc:#e8913a;--dot:#111;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141b1f;--panel:#222d33;--ink:#e6ebe8;--mut:#9aa7ac;--line:#37454c;--ok:#5fb865;--bad:#e5675b;--dot:#e6ebe8}}
+:root[data-theme="dark"]{--bg:#141b1f;--panel:#222d33;--ink:#e6ebe8;--mut:#9aa7ac;--line:#37454c;--ok:#5fb865;--bad:#e5675b;--dot:#e6ebe8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font:17px/1.4 Barlow,system-ui,-apple-system,sans-serif;touch-action:manipulation;-webkit-user-select:none;user-select:none;background-image:radial-gradient(#ffffff14 1.5px,transparent 1.5px);background-size:22px 22px}
+h1,h2,.num{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;margin:0}
+header{display:flex;align-items:center;gap:16px;padding:14px 20px;color:#e9ece6;flex-wrap:wrap}
+header h1{font-size:34px;letter-spacing:.5px}
+header .st{margin-left:auto;display:flex;gap:22px;font-size:18px}
+header .st b{font-family:"Barlow Condensed",sans-serif;font-size:22px}
+.logo i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:#fff}
+main{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 20px 24px;max-width:1200px;margin:auto}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+.p{background:var(--panel);border-radius:10px;padding:16px;margin-bottom:16px;border-left:6px solid var(--acc)}
+.p h2{font-size:28px}
+.sub{color:var(--mut);margin:2px 0 10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.chip{border:2px solid var(--line);border-radius:20px;padding:4px 12px;font-size:16px}
+.chip.ok{border-color:var(--ok);color:var(--ok)}.chip.no{border-color:var(--bad);color:var(--bad)}
+.bar{height:12px;background:var(--line);border-radius:6px;overflow:hidden;margin:4px 0 10px}
+.bar>div{height:100%;background:var(--ok);transition:width .25s}
+.pre{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+button{font:600 17px Barlow,system-ui,sans-serif;min-height:48px;min-width:48px;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:8px;padding:6px 12px}
+button:active{background:var(--acc);color:#111}
+button:disabled{opacity:.35}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.go{width:100%;min-height:62px;font:700 26px "Barlow Condensed",sans-serif;background:var(--ink);color:var(--panel)}
+.row{display:grid;grid-template-columns:22px 1fr auto;gap:8px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.row .d{width:16px;height:16px;border-radius:50%}
+.row .d.v{width:8px;height:20px;border-radius:3px;margin-left:4px}
+.row small{display:block;color:var(--mut);font-size:14px}
+.ctl{display:flex;align-items:center;gap:6px}
+.ctl .num{min-width:36px;text-align:center;font-size:26px}
+canvas{width:100%;height:170px;display:block;background:#fff1;border-radius:8px}
+#ov{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px;z-index:9}
+#ov.on{display:flex}
+#ov .p{max-width:520px;width:100%;margin:0}
+.ls{margin:10px 0;display:grid;gap:4px}
+.w{color:var(--ok)}.l{color:var(--bad)}
+</style></head><body>
+<header><div class="logo" id="logo"></div><h1>Terenia · Truppenführung</h1>
+<div class="st" id="st"></div></header>
+<main>
+<section>
+ <div class="p" id="mi"></div>
+ <div class="p"><canvas id="cv"></canvas><div class="sub" id="cvt" style="margin:8px 0 0"></div></div>
+ <button class="go" id="go" data-a="go">Einsatz befehlen</button>
+</section>
+<section class="p" id="un"></section>
+</main>
+<div id="ov"><div class="p" id="ovc"></div></div>
+<script>
+const U={inf:{n:'Infanterie',c:1,p:1,col:'#111'},eng:{n:'Pioniere',c:2,p:1,col:'#1a2ee0'},sct:{n:'Späher',c:2,p:1,col:'#2e7d32'},med:{n:'Sanitäter',c:2,p:.5,col:'#d9534f'},art:{n:'Mobile Artillerie',c:4,p:6,col:'#e8913a',v:1},arm:{n:'Panzerwagen',c:4,p:6,col:'#7a4a1a',v:1},tank:{n:'Panzer',c:6,p:11,col:'#8c2a22',v:1},barge:{n:'Landungsboote',c:3,p:0,col:'#666',v:1}};
+const K=Object.keys(U);
+const RANKS=['Sergeant','Leutnant','Landungskapitän','Schiffskapitän','Flottenkapitän'];
+const PRE={strike:{n:'Stoßgruppe',v:{inf:8,eng:1,sct:2,med:1,arm:2}},land:{n:'Landungstruppe',v:{inf:40,eng:6,sct:8,med:8,barge:8}},field:{n:'Feldbataillon',v:{inf:60,eng:12,sct:6,med:8,tank:4,art:2}},reg:{n:'Mobiles Provinzregiment',v:{inf:140,eng:24,sct:8,med:14,tank:10,arm:10,barge:4,art:10}}};
+const REQ={coast:{n:'Küstenlandung',k:'barge',b:4},mine:{n:'Minenfelder',k:'eng',b:4},fog:{n:'Nebel',k:'sct',b:3},fort:{n:'Festung',k:'art',b:2},front:{n:'Panzerfront',k:'tank',b:2}};
+const MS=[['Hafen Valmar',['coast']],['Nebelmoor',['fog']],['Minengürtel Ostmark',['mine']],['Festung Karst',['fort','mine']],['Salzküste',['coast','fog']],['Panzerpass',['front','fog']],['Stahlwall',['fort','front']],['Sturm auf Orvath',['coast','mine','front']]];
+const $=s=>document.querySelector(s),z=()=>Object.fromEntries(K.map(k=>[k,0]));
+let G;
+function init(){G={i:0,wins:0,lives:3,score:0,pool:{inf:60,eng:6,sct:5,med:5,art:2,arm:4,tank:2,barge:4},dep:z(),lost:z()};render()}
+const rk=()=>Math.min(4,Math.floor(G.wins*.6)),cap=()=>50+25*rk(),cost=d=>K.reduce((a,k)=>a+d[k]*U[k].c,0);
+const th=t=>REQ[t].b+Math.floor(G.i/3),E=()=>45+18*G.i,sp=()=>Math.max(.04,.3-.04*G.dep.sct);
+function pw(){let p=K.reduce((a,k)=>a+G.dep[k]*U[k].p,0);MS[G.i][1].forEach(t=>p*=G.dep[REQ[t].k]>=th(t)?1.1:.65);return p}
+function fill(v){let lo=0,hi=12,mk=t=>{const d=z();K.forEach(k=>d[k]=Math.min(G.pool[k],Math.round((v[k]||0)*t)));return d};
+for(let n=0;n<24;n++){const m=(lo+hi)/2;cost(mk(m))<=cap()?lo=m:hi=m}G.dep=mk(lo);G.lost=z();render()}
+function render(){const m=MS[G.i],d=G.dep,c=cost(d),p=pw(),e=E(),s=sp();
+$('#logo').innerHTML=['#1a2ee0','#2e7d32','#2e7d32','#d9534f','#fff','#fff','#fff'].map(x=>`<i style="background:${x}"></i>`).join('');
+$('#st').innerHTML=`<span>Rang <b>${RANKS[rk()]}</b></span><span>Leben <b>${'♥'.repeat(G.lives)||'–'}</b></span><span>Punkte <b>${G.score}</b></span>`;
+$('#mi').innerHTML=`<h2>Einsatz ${G.i+1}/8: ${m[0]}</h2><div class="sub">Feindstärke ca. ${Math.round(e*(1-s))}–${Math.round(e*(1+s))} (mehr Späher = genauer)</div>
+<div class="chips">${m[1].map(t=>{const ok=d[REQ[t].k]>=th(t);return `<span class="chip ${ok?'ok':'no'}">${ok?'✓':'✗'} ${REQ[t].n}: ${th(t)}× ${U[REQ[t].k].n}</span>`}).join('')}</div>
+<div>Eigene Stärke <b>${Math.round(p)}</b></div><div class="bar"><div style="width:${Math.min(100,p/(e*1.3)*100)}%"></div></div>
+<div>Befehlskapazität <b>${c}/${cap()}</b></div><div class="bar"><div style="width:${c/cap()*100}%;background:var(--acc)"></div></div>`;
+$('#un').innerHTML=`<h2>Truppen aufstellen</h2><div class="pre">${Object.entries(PRE).map(([k,v])=>`<button data-a="pre" data-k="${k}">${v.n}</button>`).join('')}</div>
+<button data-a="clr" style="width:100%">Alle zurück in die Reserve</button>`+K.map(k=>{const u=U[k];return `<div class="row"><i class="d${u.v?' v':''}" style="background:${u.col}"></i><div>${u.n}<small>Kosten ${u.c} · Reserve ${G.pool[k]-d[k]}</small></div>
+<div class="ctl">${k=='inf'?'<button data-a="st" data-k="inf" data-d="-10">−10</button>':''}<button data-a="st" data-k="${k}" data-d="-1">−</button><span class="num">${d[k]}</span><button data-a="st" data-k="${k}" data-d="1">+</button>${k=='inf'?'<button data-a="st" data-k="inf" data-d="10">+10</button>':''}</div></div>`}).join('');
+$('#go').disabled=!c;draw()}
+function draw(){const cv=$('#cv'),r=devicePixelRatio||1,W=cv.clientWidth,H=170;cv.width=W*r;cv.height=H*r;const x=cv.getContext('2d');x.scale(r,r);
+let n=0,vx=0;const per=Math.max(1,Math.floor((W-60)/12)),dep=G.dep;
+K.forEach(k=>{for(let j=0;j<dep[k];j++){const lost=j>=dep[k]-G.lost[k],u=U[k];
+if(!u.v){const px=10+(n%per)*12,py=10+Math.floor(n/per)*12;n++;if(py>H-6)continue;x.beginPath();x.arc(px,py,4,0,7);if(lost){x.strokeStyle='#b3362c';x.lineWidth=1.5;x.stroke()}else{x.fillStyle=k=='inf'?getComputedStyle(document.body).getPropertyValue('--dot')||'#111':u.col;x.fill()}}
+else{const px=W-14-Math.floor(vx/8)*13,py=12+(vx%8)*19;vx++;x.fillStyle=lost?'#b3362c55':u.col;x.fillRect(px,py,7,16)}}});
+$('#cvt').textContent=cost(dep)?'Punkte: Fußtruppen, Balken: Fahrzeuge. Rot umrandet = Verluste.':'Noch keine Truppen aufgestellt.'}
+function go(){const d=G.dep,m=MS[G.i],p=pw(),e=E()*(1+(Math.random()*2-1)*sp()),ra=p/e,win=ra>=1;
+const f=win?Math.min(.3,Math.max(.05,.28/ra)):Math.min(.7,.4+(1-ra)*.4),md=Math.min(.5,d.med/Math.max(1,d.inf)*4),lost=z();
+K.forEach(k=>{lost[k]=Math.min(d[k],Math.round(d[k]*f*(1-md)*(k=='med'?.5:1)));G.pool[k]-=lost[k]});
+G.lost=lost;render();let pts=0;if(win){G.wins++;pts=Math.round(ra*100);G.score+=pts}else G.lives--;
+const old=rk();G.i++;const over=G.lives<=0||G.i>=8;let re='';
+if(!over){G.pool.inf+=14;G.pool.eng+=2;G.pool.sct++;G.pool.med++;const vs=['art','arm','tank','barge'].sort(()=>Math.random()-.5).slice(0,2);vs.forEach(k=>G.pool[k]++);re=`Nachschub: +14 Infanterie, +2 Pioniere, +1 Späher, +1 Sanitäter, +1 ${U[vs[0]].n}, +1 ${U[vs[1]].n}`}
+const ls=K.filter(k=>lost[k]).map(k=>`<span><i class="d" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${U[k].col}"></i> −${lost[k]} ${U[k].n}</span>`).join('')||'<span>Keine Verluste</span>';
+let best=0;if(over){try{best=+localStorage.getItem('terenia-best')||0;if(G.score>best){best=G.score;localStorage.setItem('terenia-best',best)}}catch(_){}}
+$('#ovc').innerHTML=`<h2 class="${win?'w':'l'}">${win?'Sieg':'Rückschlag'} bei ${m[0]}</h2><div class="sub">Stärke ${Math.round(p)} gegen Feind ${Math.round(e)}${win?` · +${pts} Punkte`:' · 1 Leben verloren'}</div><div class="ls">${ls}</div>`+
+(win&&rk()>old?`<p><b>Beförderung zum ${RANKS[rk()]}!</b> Befehlskapazität jetzt ${cap()}.</p>`:'')+
+(over?`<p><b>${G.lives>0?'Terenia ist gesichert – Feldzug gewonnen!':'Der Feldzug ist verloren.'}</b><br>Punkte ${G.score} · Bestwert ${best}</p><button class="go" data-a="new">Neuer Feldzug</button>`:`<p>${re}</p><button class="go" data-a="next">Nächster Einsatz</button>`);
+$('#ov').classList.add('on')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,k=b.dataset.k;
+if(a=='st'){let n=Math.max(0,Math.min(G.pool[k],G.dep[k]+ +b.dataset.d));const o=G.dep[k];G.dep[k]=n;while(G.dep[k]>o&&cost(G.dep)>cap())G.dep[k]--;G.lost=z();render()}
+else if(a=='pre')fill(PRE[k].v);else if(a=='clr'){G.dep=z();G.lost=z();render()}
+else if(a=='go'&&cost(G.dep))go();
+else if(a=='next'){$('#ov').classList.remove('on');G.dep=z();G.lost=z();render()}
+else if(a=='new'){$('#ov').classList.remove('on');init()}});
+addEventListener('resize',draw);init();
+</script></body></html>
